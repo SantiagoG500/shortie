@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Providers from './providers';
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@heroui/react';
+import NextLink from 'next/link';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +26,40 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className='dark'>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>
+          <Navbar position='sticky' className='h-14  mb-4' >
+            <NavbarBrand>
+              <p className="font-bold text-inherit">ACME</p>
+            </NavbarBrand>
+            <NavbarContent className="hidden sm:flex gap-4" justify="center">
+              <NavbarItem>
+                <Link color='foreground' href='/' as={NextLink}>Home</Link>
+              </NavbarItem>
+
+              <NavbarItem isActive>
+                <Link color='foreground' href='/dashboard' as={NextLink}>Dashboard</Link>
+              </NavbarItem>
+
+            </NavbarContent>
+
+            <NavbarContent justify="end">
+              <NavbarItem>
+                <Button as={Link} color="primary" href="/auth" variant="flat">
+                  Sign In
+                </Button>
+              </NavbarItem>
+            </NavbarContent>
+
+          </Navbar>
+
+          <main className='h-[98vh]'>
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );
