@@ -1,5 +1,5 @@
 {
-  "name": "shorie",
+  "name": "shortie",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,11 +11,13 @@
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
     "@heroui/react": "^2.7.2",
+    "@hookform/resolvers": "^4.1.3",
     "@libsql/client": "^0.14.0",
     "@next/env": "^15.1.7",
     "@paralleldrive/cuid2": "^2.2.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
+    "argon2": "^0.41.1",
     "drizzle-orm": "^0.39.3",
     "framer-motion": "^12.4.7",
     "lucide-react": "^0.475.0",
@@ -23,6 +25,7 @@
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
     "server-only": "^0.0.1",
     "zod": "^3.24.2"
   },

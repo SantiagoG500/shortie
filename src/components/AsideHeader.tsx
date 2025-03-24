@@ -12,33 +12,11 @@ interface AsideHeaderProps {
   setSelectedTags: (keys: SharedSelection) => void
 }
 
-export function AsideHeader({ tags, selectedTags, setSelectedTags }: AsideHeaderProps) {
-  const handleSelectionChange = (keys: SharedSelection) => {
-    setSelectedTags(new Set(keys as Iterable<string>));
-  };
-
+export function AsideHeader() {
   return (
     <header className='md:w-full'>
       <div>
-        <Dropdown>
-          <DropdownTrigger>
-            <Button startContent={<ListFilter className='w-4 h-4 text-stone-500' />} size='sm' variant='light' className='text-stone-400 '>Add Filter</Button>
-          </DropdownTrigger>
-          <DropdownMenu
-            variant='faded'
-            color='primary'
-            aria-label="Static Actions"
-            items={tags}
-            selectionMode='multiple'
-            closeOnSelect={false}
-            selectedKeys={selectedTags}
-            onSelectionChange={handleSelectionChange}
-          >
-            {(tag) => (
-              <DropdownItem key={tag.key}>{tag.label}</DropdownItem>
-            )}
-          </DropdownMenu>
-        </Dropdown>
+      
       </div>
       <Input
         className='mt-2'
@@ -50,3 +28,23 @@ export function AsideHeader({ tags, selectedTags, setSelectedTags }: AsideHeader
     </header>
   );
 }
+
+{/* <Dropdown>
+<DropdownTrigger>
+  <Button startContent={<ListFilter className='w-4 h-4 text-stone-500' />} size='sm' variant='light' className='text-stone-400 '>Add Filter</Button>
+</DropdownTrigger>
+<DropdownMenu
+  variant='faded'
+  color='primary'
+  aria-label="Static Actions"
+  items={tags}
+  selectionMode='multiple'
+  closeOnSelect={false}
+  selectedKeys={selectedTags}
+  onSelectionChange={handleSelectionChange}
+>
+  {(tag) => (
+    <DropdownItem key={tag.key}>{tag.label}</DropdownItem>
+  )}
+</DropdownMenu>
+</Dropdown> */}
