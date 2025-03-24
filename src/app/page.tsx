@@ -1,6 +1,3 @@
-import { auth } from '@/auth';
-import { Button } from '@heroui/react';
-
 export default async function Home() {  
   return (
     <div>

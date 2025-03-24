@@ -1,8 +1,7 @@
 'use server'
 
 import { db } from '@/db/client'
-import { links } from '@/db/db-schemas'
-import { LinkSchema } from '@/schemas/schema'
+import { links, SelectLinks } from '@/db/db-schemas'
 import { isCuid } from '@paralleldrive/cuid2'
 import { eq } from 'drizzle-orm'
 
@@ -16,11 +15,11 @@ export type ResponseMessage =
 export interface urlFormDbResult {
   error: boolean,
   message: ResponseMessage,
-  link?: LinkSchema
+  link?: SelectLinks
   timeStamp: number
 }
 
-function ReturnResult(error: boolean, message:ResponseMessage, link?: LinkSchema): urlFormDbResult {
+function ReturnResult(error: boolean, message:ResponseMessage, link?: SelectLinks): urlFormDbResult {
   return {
     error,
     message,
@@ -38,7 +37,7 @@ export async function getOneUrlFromDb(slug: string): Promise<urlFormDbResult> {
       .from(links)
       .where( eq(links.slug, slug) )
       
-    const link = res.pop() as LinkSchema | undefined  
+    const link = res.pop() as SelectLinks | undefined  
     if (!link) return ReturnResult(true, 'Link not found')
 
     return ReturnResult(false, 'Link found Succesfully', link)

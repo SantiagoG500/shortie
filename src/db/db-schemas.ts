@@ -1,4 +1,5 @@
 import { generateCUID2 } from '@/utils/cuid2';
+import { user } from '@heroui/react';
 import { relations } from 'drizzle-orm';
 import { sqliteTable as table} from "drizzle-orm/sqlite-core";
 import * as t from "drizzle-orm/sqlite-core"
@@ -126,4 +127,9 @@ export const linksTags = table('links_tags',{
   ]
 })
 
-export type insertUser = typeof users.$inferInsert
+export type InsertUser = typeof users.$inferInsert
+
+export type InsertLinks = typeof links.$inferInsert
+export type SelectLinks = typeof links.$inferSelect
+
+export type SelectTags = typeof tags.$inferSelect

@@ -1,26 +1,56 @@
 'use server'
 
+import { auth } from '@/auth'
 import { db } from '@/db/client'
-import { tags } from '@/db/db-schemas'
-import { CreateTagSchema, tagSchema } from '@/schemas/schema'
+import { SelectTags, tags } from '@/db/db-schemas'
+import { CreateTagSchema } from '@/schemas/schema'
 import { generateCUID2 } from '@/utils/cuid2'
+import { revalidatePath } from 'next/cache'
 
-export async function createTag(formData: FormData) {
+enum TagErrors {
+  SESSION_NOT_FOUND = 'User session not found',
+  NOT_VALID_DATA = 'Data is no valid to be sent to the database',
+  SUBMIT_ERROR = 'Error submiting tag data in Database',
+}
+export type TagBaseReturn = { success: boolean, error: string}
+
+export async function createTag(tagData: CreateTagSchema): Promise<TagBaseReturn> {
   try {
-    console.log('sending data...');
+    const session = await auth()
+    const { success, data } = CreateTagSchema.safeParse(tagData)
+    
+    if (!session?.user?.id) {
+      console.log('Session not found');
 
-    const tagData: CreateTagSchema = {
-      title: formData.get('title') as string
+      return {
+        success: false,
+        error: TagErrors.SESSION_NOT_FOUND
+      }
     }
-
-    const fullDataForRequest: tagSchema = {
-      title: tagData.title,
-      id: generateCUID2(),
-      userId:'gqmsghrx6csf49uckqdfw1sr'
+    if (!success) {
+      return {
+        success,
+        error: TagErrors.NOT_VALID_DATA
+      }
     }
     
-    await db.insert(tags).values(fullDataForRequest)
+    const fullTagData: SelectTags = {
+      title: data.title,
+      id: generateCUID2(),
+      userId: session.user.id
+    }
+
+    console.log({fullTagData});
+    
+    revalidatePath('/dashboard')
+    await db.insert(tags).values(fullTagData)
+
+    return { success: true, error: '' }
   } catch (error) {
     console.error('ERROR WHEN CREATING TAG: ', error)
+    return {
+      success: false,
+      error: TagErrors.SUBMIT_ERROR
+    }
   }
 }

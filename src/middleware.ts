@@ -15,15 +15,12 @@ export async function middleware(request: NextRequest) {
   const isNotFound = pathName === '/not-found'
   const slug = pathName.split('/').pop()
 
-  if (pathName === '/not-found') return NextResponse.next()
-  console.log('middleware: ', {pathName, isPrivateRoute, isPublicRoute, isNotFound, slug, session});
-
+  if (isNotFound) return NextResponse.next()
   
   if (isPrivateRoute && !session) {
     console.log('not authenticated');
     
     return NextResponse.redirect(new URL('/auth', request.url))
-  
   }
 
   if(!isPublicRoute && !isPrivateRoute) {
@@ -43,8 +40,7 @@ export async function middleware(request: NextRequest) {
       else if (link) return NextResponse.redirect(link?.url)
 
     }
-
-
+    
     return NextResponse.redirect(new URL('/not-found', request.url))
   }
 }

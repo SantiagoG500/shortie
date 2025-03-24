@@ -1,148 +1,106 @@
-import { validateLink, ValidateLinkErrors } from '@/schemas/validate-schemas';
-import { createLink  } from '@/server/actions/link';
-import { generateCUID2 } from '@/utils/cuid2';
 import { Modal, ModalBody, ModalContent, ModalHeader, ModalFooter, Button, Input, Form } from '@heroui/react';
 import { Dice5 } from 'lucide-react';
-import { FormEvent, ReactNode, useState } from 'react';
+import { useLinkForm } from '@/hooks/useForms';
+import { Controller } from 'react-hook-form';
 
-function useCreateLinkModal() {
-  const [errors, setErrors] = useState({title: [], description: [], url: [], slug: []} as ValidateLinkErrors)
-  const [randomCode, setRandomCode] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleRandomCode = (val?: string) => {
-    if (val) setRandomCode(val)
-    else {
-      const newCode = generateCUID2(7)
-      setRandomCode(newCode)
-    }
-  }
-
-  const onSumbit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()  
-    const formData = new FormData(e.currentTarget)
-    const {errors, success} = validateLink(formData)
-
-    if (!success) setErrors({...errors})
-    else refreshErrors()
-
-    try {
-      setLoading(true)
-      console.log('validation succesful', {loading});
-      if (success) await createLink(formData)
-    } catch (error) {
-      console.error('ERROR WHEN DATA (LINK):', error)
-    } finally {
-      setLoading(false)
-    }
-  } 
-
-  const iterateErrors = (errors: string[]): ReactNode => {
-    return(
-      <ul>
-        {errors.map( (error, i) => (
-          <li key={i}>{error}</li>
-        ) )}
-      </ul>
-    )
-  }
-  const refreshErrors = () => ( setErrors({title: [], description: [], url: [], slug: []}) )
-  const handleClose = ({onLinkModalOpenChange}: {onLinkModalOpenChange: () => void}) => {
-    refreshErrors()
-    onLinkModalOpenChange()
-  }
-
-  return {errors, randomCode, loading, onSumbit, iterateErrors, handleClose, handleRandomCode}
-}
 interface CreateLinkModalProps {
-  isLinkModalOpen: boolean,
-  onLinkModalOpenChange: () => void
+  isModalOpen: boolean,
+  onOpenChange: () => void
 }
-export function CreateLinkModal({isLinkModalOpen, onLinkModalOpenChange}: CreateLinkModalProps) {
-  const {errors, randomCode, loading ,onSumbit, iterateErrors, handleClose, handleRandomCode } = useCreateLinkModal()
+
+export function CreateLinkModal({isModalOpen, onOpenChange}: CreateLinkModalProps) {
+  const { handleClose, handleSubmit, register, onSubmit, setSlug, control, errors, isSubmitting } = useLinkForm({onOpenChange})
+
 
   return (
-    <Modal isOpen={isLinkModalOpen} onOpenChange={() => ( handleClose({onLinkModalOpenChange}) )}>
-    <ModalContent>
-      {(onClose) => (
-        <>
-          <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
-          <ModalBody>
-            <Form onSubmit={onSumbit}>
-              <Input
-                errorMessage={errors.title.length > 0 ? iterateErrors(errors.title) : undefined}
-                isInvalid={errors.title.length > 0}
-
-                color='primary'
-                variant='faded'
-                
-                name='title'
-                label='Link title'
-                placeholder='Title'
-              />
-              <Input
-                errorMessage={errors.description.length > 0 ? iterateErrors(errors.description) : undefined}
-                isInvalid={errors.description.length > 0}
-
-                color='primary'
-                variant='faded'
-                
-                name='description'
-                label='Link description'
-                placeholder='Description'
-              />
-              
-              <Input
-                errorMessage={errors.url.length > 0 ? iterateErrors(errors.url) : undefined}
-                isInvalid={errors.url.length > 0}
-                
-                color='primary'
-                variant='faded'
-
-                name='url'
-                label='Destination link'
-                placeholder='https://www.website.com'
-              />
-              <div className='flex items-center gap-1 w-full'>
+    <Modal isOpen={isModalOpen} onOpenChange={handleClose}>
+      <ModalContent>
+          <>
+            <ModalHeader className="flex flex-col gap-1">Create New Link</ModalHeader>
+            <ModalBody> 
+              <Form onSubmit={handleSubmit(onSubmit)}>
                 <Input
-                  errorMessage={errors.slug.length > 0 ? iterateErrors(errors.slug) : undefined}
-                  isInvalid={errors.slug.length > 0}
-                  onChange={e => handleRandomCode(e.target.value)}
-                  value={randomCode}
-                  
+                  color='primary' 
+                  variant='bordered'
+                  {...register('title')}
+                  isInvalid={!!errors.title}
+                  errorMessage={errors.title?.message}
+                  label='Link title'
+                  placeholder='Title'
+                />
+                <Input
                   color='primary'
-                  variant='faded'
-                  className=''
+                  variant='bordered'
+                  {...register('description')}
+                  isInvalid={!!errors.description}
+                  errorMessage={errors.description?.message}
+                  label='Link description'
+                  placeholder='Description'
+                />
+                <Input
+                  color='primary'
+                  variant='bordered'
+                  {...register('url')}
+                  isInvalid={!!errors.url}
+                  errorMessage={errors.url?.message}
+                  label='Destination link'
+                  placeholder='https://www.website.com'
+                />
 
-                  name='slug'
-                  label='Short Link slug'
-                  placeholder=' hq66mgy'
+              <div className='flex items-center gap-1 w-full'>
+                <Controller
+                  name="slug"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      color='primary'
+                      variant='bordered'
+                      {...field}
+                      isInvalid={!!fieldState.error}
+                      errorMessage={fieldState.error?.message}
+                      label='Short Link slug'
+                      placeholder='hq66mgy'
+                    />
+                  )}
                 />
                 <Button 
                   isIconOnly 
-                  color="primary" 
+                  className='text-primary-300 hover:text-primary-500'
+                  color="default" 
                   aria-label='randomize slug' 
-                  type='button' 
-                  onPress={() => handleRandomCode()} 
-                  value={randomCode}
+                  type='button'
+                  variant='bordered'
+                  onPress={setSlug}
                 >
-                  <Dice5/>
+                  {/* <Dice5 className='text-primary-300'/> */}
+                  <Dice5 />
                 </Button>
               </div>
-              <ModalFooter className='w-full'>
-                <Button color="danger" variant="light" onPress={onClose} type='button'>
-                  Close
-                </Button>
-                <Button color="primary"  type='submit' isLoading={loading}>
-                  Create
-                </Button>
-              </ModalFooter>
-            </Form>
 
-          </ModalBody>
-        </>
-      )}
-    </ModalContent>
-  </Modal>
-  )
+                <ModalFooter className='w-full pr-0'>
+                  <Button 
+                    size="sm"
+                    onPress={handleClose} 
+                    type='button'
+                    variant='ghost'
+                    isLoading={isSubmitting}
+                  >
+                    Close
+                  </Button>
+                  <Button 
+                    size="sm"
+                    color="primary" 
+                    type='submit'
+                    variant='ghost'
+                    isLoading={isSubmitting}
+                  >
+                    Create
+                  </Button>
+                </ModalFooter>
+              </Form>
+            </ModalBody>
+          </>
+      </ModalContent>
+    </Modal>
+  );
 }

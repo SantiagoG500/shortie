@@ -1,4 +1,4 @@
-import { AuthSchema, CreateLinkSchema, CreateTagSchema } from './schema';
+import { CreateAuthSchema, CreateLinkSchema, CreateTagSchema } from './schema';
 
 export interface ValidateLinkErrors {
   title: string[];
@@ -59,12 +59,12 @@ export function validateTag (formData: FormData) {
 }
 
 export function validateUser(formData: FormData) {
-  const authData: AuthSchema = {
+  const authData: CreateAuthSchema = {
     email: formData.get('email') as string,
     password: formData.get('password') as string
   }
 
-  const parsingResult = AuthSchema.safeParse(authData)
+  const parsingResult = CreateAuthSchema.safeParse(authData)
   
   const formattedErrors = parsingResult.error?.format()
   const errors: validateUserErrors = {
