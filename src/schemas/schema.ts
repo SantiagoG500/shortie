@@ -19,6 +19,9 @@ export const CreateLinkSchema = z.object({
     /^\S+$/,
     {message: "Blank spaces are not allowed"}
   ),
+  selectedTags: z.set(z.string())
+    .refine((set) => set?.size <= 3, {message:  'Maximun 3 tags allowed'})
+    .optional()
 })
 .refine(
   (link) => link.slug !== link.url, 
@@ -53,6 +56,9 @@ export const EditLinkSchema = z.object({
   ])
     .optional()
     .transform((val) => val === "" ? undefined : val),
+  selectedTags: z.set(z.string())
+    .refine((set) => set?.size <= 3, {message:  'Maximun 3 tags allowed'})
+    .optional()
 }).refine(
   (link) => !link.slug || !link.url || link.slug !== link.url,
   { message: 'Original Link and slug cannot be the same', path: ['url'] }

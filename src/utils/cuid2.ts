@@ -12,9 +12,7 @@ export const generateCUID2 = (length?: number): string => {
 
 export const isValidCUID = (val: string): boolean  => {
   const regex = /^[a-z0-9]+$/
-
-  console.log({val, length: val.length});
-
+  
   if (val && regex.test(val)) return true
   if (val.length >= 7 || val.length <= 24) return true
 

@@ -2,12 +2,12 @@
 
 import { addToast, Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Popover, PopoverContent, PopoverTrigger } from '@heroui/react';
 import { Hash, Copy, Trash, Pencil } from 'lucide-react';
-import { SelectLinks } from '@/db/db-schemas';
 import { appDomain } from '@/routes';
+import { LinksAndTags } from '@/server/actions/link';
 
 interface LinkCardProps {
-  linkData: SelectLinks,
-  handleCurrentLink: (link: SelectLinks) => void,
+  linkData: LinksAndTags,
+  handleCurrentLink: (link: LinksAndTags) => void,
   onDeleteModalOpen : () => void
   onEditModalOpen : () => void
 }
@@ -57,14 +57,14 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
             <span className='text-sm text-stone-300 hover:text-stone-400 truncate' title='original link'>{url}</span>
             <Popover>
               <PopoverTrigger>
-                <Button isIconOnly variant='light' size='sm'>
-                  <Copy className='w-4 h-4 hover:text-primary-400'/>
+                <Button isIconOnly className='hover:text-primary-400' variant='light' size='sm'>
+                  <Copy className='w-4 h-4'/>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className='w-min p-0'>
                 <ButtonGroup>
                   <Button
-                    className='text-primary-200 hover:text-primary-300 font-bold'
+                    className='text-primary-300 hover:text-primary-400 font-bold'
                     color='default'
                     value={url}
                     onPress={async () => {
@@ -79,7 +79,7 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
                       Copy original link
                   </Button>
                   <Button
-                    className='text-primary-200 hover:text-primary-300 font-bold'
+                    className='text-primary-300 hover:text-primary-400 font-bold'
                     color='default'
                     value={`${appDomain}/${slug}`}
                     onPress={async () => {

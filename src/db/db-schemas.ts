@@ -1,5 +1,4 @@
 import { generateCUID2 } from '@/utils/cuid2';
-import { user } from '@heroui/react';
 import { relations } from 'drizzle-orm';
 import { sqliteTable as table} from "drizzle-orm/sqlite-core";
 import * as t from "drizzle-orm/sqlite-core"
@@ -120,7 +119,6 @@ export const tagsRelations = relations(tags, ({one, many}) => {
 export const linksTags = table('links_tags',{
   linkId: t.text().notNull().references(() =>  links.id),
   tagId: t.text().notNull().references(() =>  tags.id),
-  
 }, (table) => {
   return [
     t.primaryKey({columns: [table.linkId, table.tagId]})
@@ -133,3 +131,7 @@ export type InsertLinks = typeof links.$inferInsert
 export type SelectLinks = typeof links.$inferSelect
 
 export type SelectTags = typeof tags.$inferSelect
+export type InsertTags = typeof tags.$inferInsert
+
+export type SelectLinksTags = typeof linksTags.$inferSelect
+export type InsertLinksTags = typeof linksTags.$inferInsert

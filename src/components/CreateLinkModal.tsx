@@ -1,16 +1,30 @@
-import { Modal, ModalBody, ModalContent, ModalHeader, ModalFooter, Button, Input, Form } from '@heroui/react';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalFooter, Button, Input, Form, Select, SelectItem, Selection, SharedSelection } from '@heroui/react';
 import { Dice5 } from 'lucide-react';
 import { useLinkForm } from '@/hooks/useForms';
 import { Controller } from 'react-hook-form';
+import { SelectTags } from '@/db/db-schemas';
+import { useState } from 'react';
+import { MAX_TAGS_PER_LINK } from '@/constants';
 
 interface CreateLinkModalProps {
   isModalOpen: boolean,
-  onOpenChange: () => void
+  onOpenChange: () => void,
+  tags: SelectTags[]
 }
 
-export function CreateLinkModal({isModalOpen, onOpenChange}: CreateLinkModalProps) {
-  const { handleClose, handleSubmit, register, onSubmit, setSlug, control, errors, isSubmitting } = useLinkForm({onOpenChange})
+export function CreateLinkModal({isModalOpen, onOpenChange, tags}: CreateLinkModalProps) {
+  const {
+    handleClose,
+    handleSubmit,
+    register,
+    onSubmit,
+    setSlug,
 
+    control,
+    errors,
+    isSubmitting
+  } = useLinkForm({onOpenChange})
+  const [ selectedTags, setSelectedTags ] = useState<Set<string>>(new Set([]))
 
   return (
     <Modal isOpen={isModalOpen} onOpenChange={handleClose}>
@@ -47,36 +61,75 @@ export function CreateLinkModal({isModalOpen, onOpenChange}: CreateLinkModalProp
                   placeholder='https://www.website.com'
                 />
 
-              <div className='flex items-center gap-1 w-full'>
+                <div className='flex items-center gap-1 w-full'>
+                  <Controller
+                    name="slug"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Input
+                        color='primary'
+                        variant='bordered'
+                        {...field}
+                        isInvalid={!!fieldState.error}
+                        errorMessage={fieldState.error?.message}
+                        label='Short Link slug'
+                        placeholder='hq66mgy'
+                      />
+                    )}
+                  />
+                  <Button 
+                    isIconOnly 
+                    className='text-primary-300 hover:text-primary-500'
+                    color="default" 
+                    aria-label='randomize slug' 
+                    type='button'
+                    variant='bordered'
+                    onPress={setSlug}
+                  >
+                    <Dice5 />
+                  </Button>
+                </div>
+
                 <Controller
-                  name="slug"
+                  name='selectedTags'
                   control={control}
+                  defaultValue={selectedTags}
                   render={({ field, fieldState }) => (
-                    <Input
+                    <Select
+                      label='Tags'
+                      placeholder='Select a tag'
                       color='primary'
                       variant='bordered'
-                      {...field}
-                      isInvalid={!!fieldState.error}
+                      selectionMode='multiple'
+                      aria-label='search by tag'
+
                       errorMessage={fieldState.error?.message}
-                      label='Short Link slug'
-                      placeholder='hq66mgy'
-                    />
+                      isInvalid={Boolean(fieldState.error)}
+
+                      disabled={tags.length === 0}
+                      selectedKeys={field.value || new Set()}
+
+                      onSelectionChange={(selection: Selection) => {
+                        const newSelection = new Set(
+                          Array.from(selection).filter((value): value is string => value !== undefined )
+                        )
+                        
+                        if (newSelection.size <= MAX_TAGS_PER_LINK) {
+                          field.onChange(newSelection)
+                          setSelectedTags(newSelection)
+                        }
+
+                      }}
+                      
+                    >
+                      {tags.map(tag => (
+                       <SelectItem key={tag.id} color='primary' variant='faded'>
+                          {tag.title}
+                       </SelectItem> 
+                      ))}
+                    </Select>
                   )}
                 />
-                <Button 
-                  isIconOnly 
-                  className='text-primary-300 hover:text-primary-500'
-                  color="default" 
-                  aria-label='randomize slug' 
-                  type='button'
-                  variant='bordered'
-                  onPress={setSlug}
-                >
-                  {/* <Dice5 className='text-primary-300'/> */}
-                  <Dice5 />
-                </Button>
-              </div>
-
                 <ModalFooter className='w-full pr-0'>
                   <Button 
                     size="sm"

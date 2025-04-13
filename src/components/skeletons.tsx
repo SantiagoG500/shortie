@@ -1,3 +1,4 @@
+'use client'
 import { Button, Card, Input, Skeleton } from '@heroui/react';
 import { Link2, Search,TagsIcon } from 'lucide-react';
 
