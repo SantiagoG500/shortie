@@ -1,6 +1,6 @@
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from './db/client';
-import { encode } from 'next-auth/jwt' 
+
 
 import NextAuth from 'next-auth';
 import Github from 'next-auth/providers/github';
@@ -9,7 +9,7 @@ import Credentials from 'next-auth/providers/credentials';
 
 import { getUser } from './server/actions/user';
 import { CreateAuthSchema } from './schemas/schema';
-import { users, insertUser } from '@/db/db-schemas';
+import { InsertUser } from '@/db/db-schemas';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db),
@@ -36,9 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.log('Fetching user...');
           
           const {email, password} = parsedCredentials.data
-          const user = await getUser({email, password}) as insertUser
-
-          console.log({user});
+          const user = await getUser({email, password}) as InsertUser
           
           if (!user) {
             console.log('No user found with email:', email);
@@ -50,7 +48,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
           
-          console.log('returning user');
           return user
         } catch (error) {
           console.error('Auth Credentials error', error);

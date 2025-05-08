@@ -19,6 +19,9 @@ export const CreateLinkSchema = z.object({
     /^\S+$/,
     {message: "Blank spaces are not allowed"}
   ),
+  selectedTags: z.set(z.string())
+    .refine((set) => set?.size <= 3, {message:  'Maximun 3 tags allowed'})
+    .optional()
 })
 .refine(
   (link) => link.slug !== link.url, 
@@ -53,6 +56,9 @@ export const EditLinkSchema = z.object({
   ])
     .optional()
     .transform((val) => val === "" ? undefined : val),
+  selectedTags: z.set(z.string())
+    .refine((set) => set?.size <= 3, {message:  'Maximun 3 tags allowed'})
+    .optional()
 }).refine(
   (link) => !link.slug || !link.url || link.slug !== link.url,
   { message: 'Original Link and slug cannot be the same', path: ['url'] }
@@ -75,6 +81,10 @@ export const CreateTagSchema = z.object({
   .min(1, {message: 'Title cannot be empty'})
   .max(20, {message: 'Title cannot be longer than 20 characters long'}),
 })
+export const DeleteTagSchema = z.object({
+  title: z.string()
+  .min(1, {message: 'Title cannot be empty'})
+})
 
 export const CreateAuthSchema = z.object({
   email: z.string()
@@ -92,4 +102,6 @@ export type DeleteLinkSchema = z.TypeOf<typeof DeleteLinkSchema>
 export type EditLinkSchema = z.TypeOf<typeof EditLinkSchema>
 
 export type CreateTagSchema = z.TypeOf<typeof CreateTagSchema>
+export type DeleteTagSchema = z.TypeOf<typeof DeleteTagSchema>
+
 export type CreateAuthSchema = z.TypeOf<typeof CreateAuthSchema>

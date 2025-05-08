@@ -5,11 +5,12 @@ import { useState } from 'react'
 
 import { LinkCard } from './LinkCard'
 import { DeleteLinkModal } from './DeleteLinkModal'
-import { SelectLinks } from '@/db/db-schemas'
+import { SelectLinks, SelectTags } from '@/db/db-schemas'
 import { EditLinkModal } from './EditLinkModal'
+import { LinksAndTags } from '@/server/actions/link'
 
 
-export function DashboardContent({ links }: {links: SelectLinks[]}) { 
+export function DashboardContent({ links, tags }: {links: LinksAndTags[], tags: SelectTags[]}) { 
   const {
     isOpen: isDeleteModalOpen,
     onOpen: onDeleteModalOpen,
@@ -21,7 +22,8 @@ export function DashboardContent({ links }: {links: SelectLinks[]}) {
     onOpenChange: onEditModalOpenChange
   } = useDisclosure()
 
-  const [currentLink, setCurrentLink] = useState<SelectLinks>({
+  // Used to let the edit modal know which link was selected
+  const [currentLink, setCurrentLink] = useState<LinksAndTags>({
     title: '',
     id: '',
     userId: '',
@@ -31,9 +33,10 @@ export function DashboardContent({ links }: {links: SelectLinks[]}) {
     clicks: 0,
     slug: '',
     url: '',
+    tags: []
   })
 
-  const handleCurrentLink = (newLink: SelectLinks) => { setCurrentLink(newLink) }
+  const handleCurrentLink = (newLink: LinksAndTags) => { setCurrentLink(newLink) }
 
   return (
     <>
@@ -59,6 +62,7 @@ export function DashboardContent({ links }: {links: SelectLinks[]}) {
         onOpenChange={onDeleteModalOpenChange}
       />
       <EditLinkModal
+        tags={tags}
         link={currentLink}
         isModalOpen={isEditModalOpen}
         onOpenChange={onEditModalOpenChange}

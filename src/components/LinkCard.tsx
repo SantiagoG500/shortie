@@ -2,12 +2,12 @@
 
 import { addToast, Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Popover, PopoverContent, PopoverTrigger } from '@heroui/react';
 import { Hash, Copy, Trash, Pencil } from 'lucide-react';
-import { SelectLinks } from '@/db/db-schemas';
 import { appDomain } from '@/routes';
+import { LinksAndTags } from '@/server/actions/link';
 
 interface LinkCardProps {
-  linkData: SelectLinks,
-  handleCurrentLink: (link: SelectLinks) => void,
+  linkData: LinksAndTags,
+  handleCurrentLink: (link: LinksAndTags) => void,
   onDeleteModalOpen : () => void
   onEditModalOpen : () => void
 }
@@ -20,7 +20,7 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
 
   return (
     <>
-      <Card className='bg-default-50'>
+      <Card className='bg-default-50/70 border border-default-200 hover:bg-default-100 hover:border-default-300 hover:text-primary'>
         <CardHeader className='flex justify-between'>
           <h4 className='font-bold'>{title}</h4>
           <div className='flex gap-1'>
@@ -28,7 +28,7 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
               isIconOnly
               variant='light'
               size='sm'
-              className='text-stone-300 hover:text-primary-500'
+              className='hover:text-primary-500'
               onPress={() => {
                 handleCurrentLink(linkData)
                 onEditModalOpen()
@@ -40,7 +40,7 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
               isIconOnly
               variant='light'
               size='sm'
-              className='text-stone-300 hover:text-danger-500'
+              className='hover:text-danger-500'
               onPress={() => {
                 handleCurrentLink(linkData)  
                 onDeleteModalOpen()
@@ -52,20 +52,20 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
         </CardHeader>
 
         <CardBody>
-          <p className='text-base line-clamp-2'>{description}</p>
+          <p className='text-base line-clamp-2 text-foreground'>{description}</p>
           <div className='flex items-center gap-2'>
-            <span className='text-sm text-stone-300 hover:text-stone-400 truncate' title='original link'>{url}</span>
-            <Popover>
+            <span className='text-foreground hover:text-foreground/75 text-sm truncate' title='original link'>{url}</span>
+            <Popover color='primary'>
               <PopoverTrigger>
-                <Button isIconOnly variant='light' size='sm'>
-                  <Copy className='w-4 h-4 hover:text-primary-400'/>
+                <Button isIconOnly className=' hover:text-primary-400' variant='light' size='sm'>
+                  <Copy className='w-4 h-4'/>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className='w-min p-0'>
                 <ButtonGroup>
                   <Button
-                    className='text-primary-200 hover:text-primary-300 font-bold'
-                    color='default'
+                    className='text-primary hover:text-primary-400 font-bold'
+                    
                     value={url}
                     onPress={async () => {
                       await navigator.clipboard.writeText(url)
@@ -79,8 +79,8 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
                       Copy original link
                   </Button>
                   <Button
-                    className='text-primary-200 hover:text-primary-300 font-bold'
-                    color='default'
+                    className='text-primary hover:text-primary-400 font-bold'
+                    
                     value={`${appDomain}/${slug}`}
                     onPress={async () => {
                       const redirectUrl= `${appDomain}${slug}`
@@ -101,10 +101,10 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
         </CardBody>
 
         <CardFooter className='flex justify-between'>
-          <span className='text-sm'>{formatedDate}</span>
+          <span className='text-foreground text-sm'>{formatedDate}</span>
           <div className='flex items-center gap-1'>
-            <Hash className='w-4 h-4'/>
-            <span className='text-sm'>{clicks} Clicks</span>
+            <Hash className='w-4 h-4 text-foreground'/>
+            <span className='text-foreground text-sm'>{clicks} Clicks</span>
           </div>
         </CardFooter>
       </Card>

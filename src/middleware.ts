@@ -26,10 +26,7 @@ export async function middleware(request: NextRequest) {
   if(!isPublicRoute && !isPrivateRoute) {
     if (slug && isCuid(slug)) {
       const dbResult = await getOneUrlFromDb(slug)
-      const {link, error, message, timeStamp} = dbResult
-
-      console.log({link});
-      
+      const {link, error, message, timeStamp} = dbResult      
 
       if (error && message) {
         const notFoundURL = new URL('/not-found', request.url)
