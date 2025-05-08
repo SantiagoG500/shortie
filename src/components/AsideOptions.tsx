@@ -1,9 +1,11 @@
 'use client'
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Tooltip, useDisclosure } from '@heroui/react'
-import { Link2, Pen, Tag, Tags, Trash } from 'lucide-react'
+import { Button, ScrollShadow, useDisclosure } from '@heroui/react'
+import { Link2, Pen, Tags, Trash } from 'lucide-react'
 import { CreateLinkModal } from "@/components/CreateLinkModal";
 import { CreateTagModal } from "@/components/CreateTagModal";
 import { SelectTags } from '@/db/db-schemas';
+import { EditTagModal } from './EditTagModal';
+import { DeleteTagModal } from './DeleteTagModal';
 
 export function AsideOptions({tags}: {tags: SelectTags[] | []}) {
   const { 
@@ -16,81 +18,83 @@ export function AsideOptions({tags}: {tags: SelectTags[] | []}) {
     onOpen: ontagModalOpen,
     onOpenChange: ontagModalOpenChange
   } = useDisclosure()
-  
+  const { 
+    isOpen: isEditModalOpen,
+    onOpen: onEditModalOpen,
+    onOpenChange: onEditModalOpenChange
+  } = useDisclosure()
+  const { 
+    isOpen: isDeleteModalOpen,
+    onOpen: onDeleteModalOpen,
+    onOpenChange: onDeleteModalOpenChange
+  } = useDisclosure()
 
   return (
-    <div className='flex flex-nowrap md:flex-wrap md:w-full'>
-      <Tooltip
-        placement='right'
-        showArrow={true}
-        delay={2}
-        closeDelay={2}
-        content={<p>You can create a total of <b className='text-primary-400'>20 links</b></p>}
-      >
-        <Button
-          className='text-foreground text-left md:w-full md:justify-start'
-          variant='light'
-          startContent={<b className='text-primary-500'>20</b>}
-        >
-          Links left
-        </Button>
-      </Tooltip>
-      
-      <div>
-        <Button 
-          className='text-left text-foreground md:w-full md:justify-start'
-          variant='light'
-          onPress={onlinkModalOpen}
-          startContent={<Link2 className='text-primary-500 w-5 h-5'/>}
-        >
-            New LInk
-        </Button>
-
-
-        <Dropdown>
-          <DropdownTrigger>
+    <div>
+      <ScrollShadow className='p-3 md:p-0 flex justify-center ml-auto mr-auto w-11/12 overflow-x-auto md:overflow-visible md:full md:justify-start md:m-0' orientation='horizontal'>
+        <div>
+          <div className='flex gap-2 w-min md:flex-col'>
             <Button
-              className='text-left text-foreground md:w-full md:justify-start'
-              variant='light'
-              startContent={<Tag className='text-primary-500 w-5 h-5'/>}
+              className='text-left md:w-full md:justify-start bg-transparent border border-transparent hover:border-default data-[hover=true]:bg-default-100 data-[selectable=true]:focus:border-default data-[selectable=true]:focus:bg-default-100 data-[hover=true]:transition-colors data-[hover=true]:text-primary data-[selectable=true]:focus:text-primary'
+              key='new_link'
+              startContent={<Link2 className='w-4 h-4 md:w-5 md:h-5'/>}
+              onPress={onlinkModalOpen}
             >
-                Tags
+              <div>
+                <p className='text-start'>New LInk</p>
+                <p className='text-start hidden md:block'>Create a new link</p>
+              </div>
             </Button>
-          </DropdownTrigger>
-          <DropdownMenu variant='faded' color='primary'>
-            <DropdownItem
+            <Button
+              className='text-left md:w-full md:justify-start bg-transparent border border-transparent hover:border-default data-[hover=true]:bg-default-100 data-[selectable=true]:focus:border-default data-[selectable=true]:focus:bg-default-100 data-[hover=true]:transition-colors data-[hover=true]:text-primary data-[selectable=true]:focus:text-primary'
               key='create_tag'
-              description='create a new tag'
-              startContent={<Tags/>}
+              startContent={<Tags className='w-4 h-4 md:w-5 md:h-5'/>}
               onPress={ontagModalOpen}
             >
-                New tag
-              </DropdownItem>
-            <DropdownItem
+              <div>
+                <p className='text-start'>New tag</p>
+                <p className='text-start hidden md:block'>create a new tag</p>
+              </div>
+            </Button>
+                
+            <Button
+              className='text-left md:w-full md:justify-start bg-transparent border border-transparent hover:border-default data-[hover=true]:bg-default-100 data-[selectable=true]:focus:border-default data-[selectable=true]:focus:bg-default-100 data-[hover=true]:transition-colors data-[hover=true]:text-primary data-[selectable=true]:focus:text-primary'
               key='edit_tags'
-              description='Edit existing tags'
-              startContent={<Pen/>}
+              startContent={<Pen className='w-4 h-4 md:w-5 md:h-5'/>}
+              onPress={onEditModalOpen}
             >
-                Edit tags
-            </DropdownItem>
-            <DropdownItem
+              <div>
+                <p className='text-start'>Edit tags</p>
+                <p className='text-start hidden md:block'>Edit existing tags</p>
+              </div>
+            </Button>
+                            
+            <Button
+              className='text-left  md:w-full md:justify-start bg-transparent border border-transparent hover:border-default data-[hover=true]:bg-default-100 data-[selectable=true]:focus:border-default data-[selectable=true]:focus:bg-default-100 data-[hover=true]:transition-colors data-[hover=true]:text-danger data-[selectable=true]:focus:text-danger'
               key='delete_tags'
-              color='danger'
-              description='Delete existing tags'
-              startContent={<Trash/>}
+              startContent={<Trash className='w-4 h-4 md:w-5 md:h-5'/>}
+              onPress={onDeleteModalOpen}
             >
-              Delete tags
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+              <div>
+                <p className='text-start'>Delete tags</p>
+                <p className='text-start hidden md:block'>Delete existing tags</p>
+              </div>
+            </Button>
+          </div>
+        </div>
+      </ScrollShadow>
 
       <CreateLinkModal
         onOpenChange={onlinkModalOpenChange}
         isModalOpen={islinkModalOpen}
         tags={tags}
       />
+      
       <CreateTagModal onOpenChange={ontagModalOpenChange} isModalOpen={istagModalOpen}/>
+      <EditTagModal tags={tags} onOpenChange={onEditModalOpenChange} isModalOpen={isEditModalOpen}/>
+      <DeleteTagModal tags={tags} onOpenChange={onDeleteModalOpenChange} isModalOpen={isDeleteModalOpen} />
     </div>
+    // <div className='flex flex-nowrap md:flex-wrap md:w-full'>
   )
 }
+ 

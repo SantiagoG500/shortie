@@ -6,24 +6,28 @@ import Google from './icons/Google';
 
 export function SocialLogin () {
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex justify-center gap-2'>
         <Button
           onPress={async () => (await signIn('github', {redirect: true, redirectTo: '/dashboard'}))}
-          variant='ghost'
+          className='text-foreground w-1/2'
+          color='primary'
+          variant='faded'
           size='md'
 
           endContent={<Github height={16} width={16}/>}
         >
-          Continue with Github
+          Github
         </Button>
         <Button
           onPress={async () => (await signIn('google', {redirect: true, redirectTo: '/dashboard'}))}
-          variant='ghost'
+          className='text-foreground w-1/2'
+          color='primary'
+          variant='faded'
           size='md'
             
           endContent={<Google height={16} width={16}/>}
         >
-          Continue with Google
+          Google
         </Button>
       </div>
   )

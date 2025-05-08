@@ -81,6 +81,10 @@ export const CreateTagSchema = z.object({
   .min(1, {message: 'Title cannot be empty'})
   .max(20, {message: 'Title cannot be longer than 20 characters long'}),
 })
+export const DeleteTagSchema = z.object({
+  title: z.string()
+  .min(1, {message: 'Title cannot be empty'})
+})
 
 export const CreateAuthSchema = z.object({
   email: z.string()
@@ -98,4 +102,6 @@ export type DeleteLinkSchema = z.TypeOf<typeof DeleteLinkSchema>
 export type EditLinkSchema = z.TypeOf<typeof EditLinkSchema>
 
 export type CreateTagSchema = z.TypeOf<typeof CreateTagSchema>
+export type DeleteTagSchema = z.TypeOf<typeof DeleteTagSchema>
+
 export type CreateAuthSchema = z.TypeOf<typeof CreateAuthSchema>

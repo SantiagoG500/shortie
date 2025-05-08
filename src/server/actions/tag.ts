@@ -3,7 +3,7 @@
 import { auth } from '@/auth'
 import { db } from '@/db/client'
 import { InsertLinksTags, linksTags, SelectTags, tags } from '@/db/db-schemas'
-import { CreateTagSchema } from '@/schemas/schema'
+import { CreateTagSchema, EditLinkSchema } from '@/schemas/schema'
 import { generateCUID2 } from '@/utils/cuid2'
 import { and, eq, inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
@@ -14,7 +14,8 @@ enum TagErrors {
   SUBMIT_ERROR = 'Error submiting tag data in Database',
   ADD_TAGS_ERROR = 'Something went wrong adding tags to the created link',
   QUERY_ERROR = 'Error retrieving tags',
-  UPDATE_ERROR = 'Error updating tags'
+  UPDATE_ERROR = 'Error updating tags',
+  DELETION_ERROR = 'Error deleting tag data'
 }
 export type TagBaseReturn = { success: boolean, error: TagErrors | ''}
 
@@ -57,36 +58,84 @@ export async function createTag(tagData: CreateTagSchema): Promise<TagBaseReturn
   }
 }
 
-export type getTagsReturn = TagBaseReturn & {data?: SelectTags[]}
-export async function getTags(): Promise<getTagsReturn> {
+export type UpdateTagProps = {tagData: SelectTags, newTagData: CreateTagSchema}
+export async function updateTag({tagData, newTagData}: UpdateTagProps): Promise<TagBaseReturn> {
   try {
-     const session = await auth() 
-     if (!session?.user?.id) {
-       console.log('Session not found');  
-       return {
-         success: false,
-         error: TagErrors.SESSION_NOT_FOUND
-       }
-     }
+    const session = await auth()
+    const {success} = EditLinkSchema.safeParse(newTagData)
+    
+    if (!session?.user?.id) { 
+      return {
+        success: false,
+        error: TagErrors.SESSION_NOT_FOUND
+      }
+    }
 
-    const result = await db.select()
-      .from(tags).where(eq(tags.userId, session.user.id))
+    if (!success) {
+      return {
+        success: false,
+        error: TagErrors.NOT_VALID_DATA
+      }
+    }
+
+    await db.update(tags)
+      .set(newTagData)
+      .where( eq(tags.id, tagData.id) )
+      
+    revalidatePath('/dashboard')
 
     return {
       success: true,
-      error: '',
-      data: result
+      error: ''
     }
-  } catch (error) {
-    console.error('ERROR GETTING TAGS');
-    
+  } catch (error) {    
     return {
       success: false,
-      error: TagErrors.QUERY_ERROR
+      error: TagErrors.UPDATE_ERROR
     }
   }
 }
 
+export type DeleteTagProps = {tag: SelectTags}
+export async function deleteTag({tag}: DeleteTagProps): Promise<TagBaseReturn>  {
+  
+  try {
+    const session = await auth()
+
+
+    if (!session?.user?.id) {
+      return {
+        success: true ,
+        error: TagErrors.SESSION_NOT_FOUND,
+      }
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.delete(linksTags)
+        .where( eq(linksTags.tagId, tag.id) )
+
+      await tx.delete(tags)
+        .where( eq(tags.id, tag.id) )
+    })
+
+    
+    revalidatePath('/dashboard')
+
+    return {
+      success: true,
+      error: ''
+    }
+  } catch (error) {
+    console.error('ERROR DELETING TAG', error);
+    
+    return {
+      success: false,
+      error: TagErrors.DELETION_ERROR,
+    }
+  }
+}
+
+// actions realted with actions and tags
 export async function addTags({tags, linkId}: {tags: string[], linkId: string}): Promise<TagBaseReturn> {
   try {
     const session = await auth() 
@@ -118,13 +167,44 @@ export async function addTags({tags, linkId}: {tags: string[], linkId: string}):
   } 
 }
 
-export type UpdateTagProps = {
+export type updateLInksTagsProps = {
   prevTags: string[],
   newTags: string[],
   linkId: string
 }
 
-export async function updateLinksTags ({ prevTags, newTags, linkId }: UpdateTagProps): Promise<TagBaseReturn> {
+
+export type getTagsReturn = TagBaseReturn & {data?: SelectTags[]}
+export async function getTags(): Promise<getTagsReturn> {
+  try {
+     const session = await auth() 
+     if (!session?.user?.id) {
+       console.log('Session not found');  
+       return {
+         success: false,
+         error: TagErrors.SESSION_NOT_FOUND
+       }
+     }
+
+    const result = await db.select()
+      .from(tags).where(eq(tags.userId, session.user.id))
+
+    return {
+      success: true,
+      error: '',
+      data: result
+    }
+  } catch (error) {
+    console.error('ERROR GETTING TAGS');
+    
+    return {
+      success: false,
+      error: TagErrors.QUERY_ERROR
+    }
+  }
+}
+
+export async function updateLinksTags ({ prevTags, newTags, linkId }: updateLInksTagsProps): Promise<TagBaseReturn> {
   try {
     const session = await auth()
 
@@ -134,6 +214,14 @@ export async function updateLinksTags ({ prevTags, newTags, linkId }: UpdateTagP
         success: false,
         error: TagErrors.SESSION_NOT_FOUND
       }
+    }
+
+    if (!prevTags) {
+      const { error, success } = await addTags({tags: newTags, linkId})
+
+      revalidatePath('/dashboard')
+      
+      return { success, error}
     }
 
     // It defines which tags are going to be removed and which don't

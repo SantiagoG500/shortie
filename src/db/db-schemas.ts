@@ -101,7 +101,7 @@ export const links = table('links', {
 })
 
 export const tags = table('tags', {
-  title: t.text('title', {length: 20}).unique(),
+  title: t.text('title', {length: 20}).unique().notNull(),
   id: t.text('id', {length: 24}).primaryKey().notNull(),
   userId: t.text('user_id').references(() => users.id).notNull()
 })

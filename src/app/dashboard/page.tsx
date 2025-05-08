@@ -19,7 +19,7 @@ export default async function Dashboard({ searchParams }: {searchParams: Promise
   
   return (
     <>
-      <div className='flex flex-col h-full md:flex-row'>  
+      <div className='w-full md:flex md:relative'>  
         <DashboardAside tags={tagsByUser ?? []}/>
         <div className='flex h-full w-full p-4'>
           

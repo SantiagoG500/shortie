@@ -98,7 +98,7 @@ type UpdateLinkProps = {linkData: SelectLinks, newLinkData: EditLinkSchema}
 export async function updateLink({linkData, newLinkData}: UpdateLinkProps): Promise<LinkBaseReturn> {
   try {
     const session = await auth()
-    const { success } = EditLinkSchema.safeParse(linkData)
+    const { success } = EditLinkSchema.safeParse(newLinkData)
     
     if (!session?.user?.id) {
 

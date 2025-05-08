@@ -46,8 +46,8 @@ export function AsideHeader({tags}: AsideHeaderProps) {
   };
   
   return (
-    <header className='md:w-full'>
-      <div className='flex flex-col gap-2'>
+    <header className='flex justify-center w-full h-min'>
+      <div className='flex flex-col gap-2 w-11/12 max-w-md'>
         <Input
           className='mt-2'
           placeholder='Search link title'
@@ -59,6 +59,7 @@ export function AsideHeader({tags}: AsideHeaderProps) {
         <Select
           className='text-default-500'
           placeholder="search by tag"
+          color='primary'
           variant='bordered'
           size='sm'
           selectionMode='multiple'

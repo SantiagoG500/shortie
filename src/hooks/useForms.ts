@@ -1,8 +1,8 @@
-import { SelectLinks } from '@/db/db-schemas';
+import { SelectLinks, SelectTags } from '@/db/db-schemas';
 import { appDomain } from '@/routes';
-import { CreateLinkSchema, CreateTagSchema, DeleteLinkSchema, EditLinkSchema } from '@/schemas/schema';
+import { CreateLinkSchema, CreateTagSchema, DeleteLinkSchema, DeleteTagSchema, EditLinkSchema } from '@/schemas/schema';
 import { createLink, deleteLink, LinksAndTags, updateLink } from '@/server/actions/link';
-import { addTags, createTag, updateLinksTags } from '@/server/actions/tag';
+import { addTags, createTag, deleteTag, updateLinksTags, updateTag } from '@/server/actions/tag';
 import { generateCUID2 } from '@/utils/cuid2';
 import { addToast, PressEvent } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -95,53 +95,6 @@ export function useLinkForm({onOpenChange}: BaseUseFormType) {
   }
 }
 
-export function useTagForm ({onOpenChange}: BaseUseFormType) {
-  const form = useForm<z.infer<typeof CreateTagSchema>>({
-    resolver: zodResolver(CreateTagSchema),
-    defaultValues:{ title: '' }
-  })
-  
-  const {
-    register,
-    handleSubmit,
-    formState: {errors, isSubmitting},
-    reset
-  } = form
-
-  const onSubmit = async (data: z.infer<typeof CreateTagSchema>) => {
-    try {
-      // Implement logic
-      const requestResult = await createTag(data)
-      
-      if (!requestResult.success) {
-        addToast({
-          title: 'Submission error',
-          description: requestResult.error,
-          color: 'danger'
-        })
-        return
-      }
-
-      addToast({
-        title: 'New tag created',
-        description: `${data.title} tag created`,
-        color: 'success'
-      })
-
-      handleClose()
-    } catch (error) {
-      console.error();
-    }
-  }
-
-  const handleClose = () => {
-    reset()
-    onOpenChange()
-  }
-
-  return { register, handleSubmit, handleClose, onSubmit, errors, isSubmitting}
-}
-
 type useLinkDeleteFormProps = BaseUseFormType & {
   link: SelectLinks
 }
@@ -183,7 +136,7 @@ export function useLinkDeleteForm ({onOpenChange, link}: useLinkDeleteFormProps)
       
       addToast({
         title: `${link.title} eliminated`,
-        description: `Link eliminared: ${link.url}`,
+        description: `Link eliminated: ${link.url}`,
         color: 'success'
       })
     } catch (error) {
@@ -203,7 +156,6 @@ export function useLinkDeleteForm ({onOpenChange, link}: useLinkDeleteFormProps)
 }
 
 type useLinkEditFormProps = BaseUseFormType & {
-  onOpenChange: () => void,
   link: LinksAndTags,
   previousTags: string[],
   userTags: string[]
@@ -334,4 +286,164 @@ export function useLinkEditForm({onOpenChange, link, userTags, previousTags}: us
     errors,
     isSubmitting    
   }
+}
+
+export function useTagForm ({onOpenChange}: BaseUseFormType) {
+  const form = useForm<z.infer<typeof CreateTagSchema>>({
+    resolver: zodResolver(CreateTagSchema),
+    defaultValues:{ title: '' }
+  })
+  
+  const {
+    register,
+    handleSubmit,
+    formState: {errors, isSubmitting},
+    reset
+  } = form
+
+  const onSubmit = async (data: z.infer<typeof CreateTagSchema>) => {
+    try {
+      // Implement logic
+      const requestResult = await createTag(data)
+      
+      if (!requestResult.success) {
+        addToast({
+          title: 'Submission error',
+          description: requestResult.error,
+          color: 'danger'
+        })
+        return
+      }
+
+      addToast({
+        title: 'New tag created',
+        description: `${data.title} tag created`,
+        color: 'success'
+      })
+
+      handleClose()
+    } catch (error) {
+      console.error();
+    }
+  }
+
+  const handleClose = () => {
+    reset()
+    onOpenChange()
+  }
+
+  return { register, handleSubmit, handleClose, onSubmit, errors, isSubmitting}
+}
+
+type UseEditTagFormProps = BaseUseFormType & {
+  tag: SelectTags
+}
+export function useEditTagForm({onOpenChange, tag}: UseEditTagFormProps) {
+  const form = useForm<z.infer<typeof CreateTagSchema>>({
+    resolver: zodResolver(CreateTagSchema),
+    defaultValues:{ title: '' }
+  })
+  
+  const {
+    register,
+    handleSubmit,
+    formState: {errors, isSubmitting},
+    reset
+  } = form
+
+  const onSubmit = async (data: z.infer<typeof CreateTagSchema>) => {
+    try {
+      const {success, error} = await updateTag({tagData: tag, newTagData: data})
+      
+      if (!success) {
+        addToast({
+          title: 'Update tag failed',
+          description: `The tag "${tag.title}" was not updated succesfully`,
+          color:'danger',
+        })
+      }
+      
+      addToast({
+        title: 'Tag Updated succesfully',
+        description: `The tag previously called "${tag.title}" was renamed to: ${data.title}`,
+        color:'success',
+      })
+
+      handleClose()
+    } catch (error) {
+      addToast({
+        title: 'Something went wrong',
+        description: 'We were not able to update this tag, try again later'
+      })
+    } finally {
+      handleClose()
+    }
+  }
+
+  const handleClose = () => {
+    reset()
+    onOpenChange()
+  }
+
+
+  return { register, handleSubmit, handleClose, onSubmit, errors, isSubmitting }
+}
+
+
+
+type useDeleteTagFormProps = BaseUseFormType & {
+  tag: SelectTags
+}
+export function useDeleteTagForm({onOpenChange, tag}: useDeleteTagFormProps) {
+  const form = useForm<z.infer<typeof DeleteTagSchema>>({
+    resolver: zodResolver(DeleteTagSchema),
+    defaultValues:{ title: '' }
+  })
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset
+  } = form
+
+
+  const onSubmit = async (data: z.infer<typeof DeleteTagSchema>) => {
+    try {
+      if (!(data.title.length > 0) || !(tag.id.length > 0)) {
+        addToast({
+          title: 'Delete tag failed',
+          description: "You didn't provide a tag somehow, refresh the page or try again later"
+        })
+      }
+
+      const {success, error} = await deleteTag({tag})
+      
+      if (!success) {
+        console.error(error);
+        
+        addToast({
+          title: 'Delete tag failed',
+          description: error,
+          color:'danger',
+        })
+      }
+      
+      addToast({
+        title: 'Tag Deleted succesfully',
+        description: `Tag eliminated: ${tag.title}`,
+        color:'success',
+      })
+
+    } catch (error) {
+      addToast({
+        title: 'Something went wrong',
+        description: 'We were not able to delete this tag, try again later'
+      })
+    } finally {
+      onOpenChange()
+    }
+  }
+
+  return { register, handleSubmit, onSubmit, isSubmitting, errors }
 }
