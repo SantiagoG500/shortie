@@ -1,7 +1,19 @@
+import { DemonstrationLinkCard } from '@/components/DemonstrationLinkCard';
+import { Footer } from '@/components/Footer';
+import { ContentSection } from '@/components/home/ContentSection';
+import { HeaderSection } from '@/components/home/HeaderSection';
+
 export default async function Home() {  
   return (
-    <div>
-      <h1 className='text-foreground font-bold text-4xl text-center'>Shortie</h1>
-    </div>
+    <>
+      <div className='flex flex-wrap items-center'>
+        <div className='mt-16'>
+          <HeaderSection/>
+        </div>
+        <section className='w-full mt-7'>
+          <ContentSection/>
+        </section>
+      </div>
+    </>
   );
 }

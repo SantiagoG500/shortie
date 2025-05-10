@@ -5,6 +5,7 @@ import Providers from './providers';
 
 import { auth } from '@/auth';
 import { MainNavBar } from '@/components/MainNavBar';
+import { Footer } from '@/components/Footer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,10 +35,11 @@ export default async function RootLayout({
       >
         <Providers>
           <MainNavBar session={session}/>
-          <main className='h-[98vh]'>
+          <main className='min-h-screen'>
             {children}
           </main>
         </Providers>
+        <Footer/>
       </body>
     </html>
   );

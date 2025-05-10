@@ -1,8 +1,8 @@
 'use server'
 
 import { db } from '@/db/client';
-import { insertUser, users } from '@/db/db-schemas';
-import { AuthSchema, CreateAuthSchema } from '@/schemas/schema';
+import { InsertUser, users } from '@/db/db-schemas';
+import { CreateAuthSchema } from '@/schemas/schema';
 import { eq } from 'drizzle-orm';
 
 export async function createUser(authData: CreateAuthSchema) {
@@ -16,7 +16,7 @@ export async function createUser(authData: CreateAuthSchema) {
   }
 }
 
-export async function getUser(authData: AuthSchema): Promise<insertUser | null>  {
+export async function getUser(authData: CreateAuthSchema): Promise<InsertUser | null>  {
     try {
       console.log('Getting data...'); 
       const user =  await db.select().from(users)
