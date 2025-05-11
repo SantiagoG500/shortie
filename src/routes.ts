@@ -1,4 +1,4 @@
-export const appDomain  = 'http://localhost:3000/'
+export const appDomain  = 'https://shortie-sigma.vercel.app/'
 export const publicRoutes = ['/', '/auth']
 export const privateRoutes = ['/dashboard', '/account']
 
