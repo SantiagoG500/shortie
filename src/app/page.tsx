@@ -1,7 +1,10 @@
-import { DemonstrationLinkCard } from '@/components/DemonstrationLinkCard';
-import { Footer } from '@/components/Footer';
 import { ContentSection } from '@/components/home/ContentSection';
 import { HeaderSection } from '@/components/home/HeaderSection';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Welcome to shortie'
+}
 
 export default async function Home() {  
   return (

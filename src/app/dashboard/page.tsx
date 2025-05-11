@@ -2,7 +2,12 @@ import { auth } from '@/auth';
 import { DashboardAside } from '@/components/DashboardAside';
 import { DashboardContent } from '@/components/DashboardContent';
 import { getLinksAndTags } from '@/server/actions/link';
+import { Metadata } from 'next';
  
+export const metadata: Metadata = {
+  title: 'Dashboard'
+}
+
 type SearchParams = {
   search?: string
   tags?: string

@@ -32,7 +32,7 @@ export function HeaderSection() {
           </div>
         </div>
         
-        <div className='flex flex-col items-center md:items-start gap-3 w-11/12 md:w-min mt-5 md:mt-0'>
+        <div className='flex flex-col items-center md:items-start gap-3 w-11/12 md:w-min mt-24 md:mt-0'>
             <h1 className='font-bold text-2xl lg:text-3xl tracking-tight inline from-primary-200 to-primary-500 bg-clip-text text-transparent bg-gradient-to-bl'>Give it a try</h1>
             <DemonstrationLinkCard
               linkData={{
