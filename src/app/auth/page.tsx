@@ -1,11 +1,6 @@
 'use client'
 import { AuthForm } from '@/components/AuthForm'
 import { Card, CardBody } from '@heroui/react'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Welcome to shortie'
-}
 
 export default function Auth() {
   return (
