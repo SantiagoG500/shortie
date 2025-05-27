@@ -81,7 +81,7 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
                   <Button
                     className='text-primary hover:text-primary-400 font-bold'
                     
-                    value={`${appDomain}/${slug}`}
+                    value={`${appDomain}${slug}`}
                     onPress={async () => {
                       const redirectUrl= `${appDomain}${slug}`
                       await navigator.clipboard.writeText(redirectUrl)
