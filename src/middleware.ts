@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && session) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   if(!isPublicRoute && !isPrivateRoute) {
