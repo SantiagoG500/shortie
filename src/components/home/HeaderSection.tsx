@@ -19,7 +19,7 @@ export function HeaderSection() {
 
           <div className='mt-3'>
             <Link
-              href='#'
+              href='/dashboard'
               as={NextLink}
               className={buttonStyles({
                 color: 'primary',
