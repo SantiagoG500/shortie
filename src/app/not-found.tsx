@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Link, button as buttonStyles } from "@heroui/react";
+import { Link, button as buttonStyles } from "@heroui/react";
 import NextLink from 'next/link';
 
 
@@ -13,7 +13,7 @@ export default function NotFound() {
           <h1 className='text-4xl font-bold tracking-tight inline from-danger-300 to-danger-600 bg-clip-text text-transparent bg-gradient-to-bl'>
             This is not fine
           </h1>
-          <p className='text-default-700/90'>Something went wrong, this page wasn't found!</p>
+          <p className='text-default-700/90'>Something went wrong, <b>this page does not exist!</b></p>
         </section>
 
         <div className='
@@ -41,7 +41,7 @@ export default function NotFound() {
             className: 'mt-4 text-md hover:bg-red-400/30 rounded-xl'
           })}
         >
-          Start creating links
+          Go to Home page
         </Link>
       </header>
     </>
