@@ -12,6 +12,10 @@ import { CreateAuthSchema } from './schemas/schema';
 import { InsertUser } from '@/db/db-schemas';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: {
+    strategy: 'database',
+    maxAge: 60 * 60 * 24 * 30
+  },
   adapter: DrizzleAdapter(db),
   providers: [
     Github({
