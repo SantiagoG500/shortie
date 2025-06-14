@@ -6,6 +6,7 @@ import { Session } from 'next-auth';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import UserDropdown from '@/components/UserDropdown';
 
 export function MainNavBar({session}: {session: Session | null}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -32,7 +33,7 @@ export function MainNavBar({session}: {session: Session | null}) {
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2 data-[active=true]:text-primary-500">
           <NavbarMenuItem isActive={pathName === '/'}>
-          <Link color='foreground' href='/' as={NextLink}>Home</Link>
+            <Link color='foreground' href='/' as={NextLink}>Home</Link>
           </NavbarMenuItem>
           {session && (
             <NavbarMenuItem isActive={pathName === '/dashboard'}>
@@ -72,11 +73,7 @@ export function MainNavBar({session}: {session: Session | null}) {
                 Sign In
               </Button>
             </NavbarItem>
-          : <Link as={NextLink} href='/account'>
-              <Avatar
-                src={session.user?.image || undefined}
-              />
-            </Link>
+          : <UserDropdown name={session.user?.name ?? ''} userImg={session.user?.image || undefined} />
         }
       </NavbarContent>
   </Navbar>
