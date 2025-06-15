@@ -28,6 +28,8 @@ export default function UserDropdown({ userImg, name }: { userImg: string | unde
               startContent={
                 <User className='w-5 h-5'/>
               }
+              as={NextLink}
+              href='/account'
             >
               My Account
             </DropdownItem>
