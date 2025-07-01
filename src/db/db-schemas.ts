@@ -97,13 +97,13 @@ export const links = table('links', {
   createdAt: t.text('created_at').notNull(),
   clicks: t.integer('clicks', {mode: 'number'}),
   recentClick: t.text('recent_click'),
-  userId: t.text('user_id').references(() => users.id).notNull()
+  userId: t.text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull()
 })
 
 export const tags = table('tags', {
   title: t.text('title', {length: 20}).unique().notNull(),
   id: t.text('id', {length: 24}).primaryKey().notNull(),
-  userId: t.text('user_id').references(() => users.id).notNull()
+  userId: t.text('user_id').references(() => users.id, {onDelete: 'cascade'}).notNull()
 })
 
 export const tagsRelations = relations(tags, ({one, many}) => {
@@ -117,8 +117,9 @@ export const tagsRelations = relations(tags, ({one, many}) => {
 })
 
 export const linksTags = table('links_tags',{
-  linkId: t.text().notNull().references(() =>  links.id),
-  tagId: t.text().notNull().references(() =>  tags.id),
+  linkId: t.text('link_id').notNull().references(() =>  links.id, { onDelete: 'cascade' }),
+  tagId: t.text('tag_id').notNull().references(() =>  tags.id, { onDelete: 'cascade' }),
+  userId: t.text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull()
 }, (table) => {
   return [
     t.primaryKey({columns: [table.linkId, table.tagId]})
