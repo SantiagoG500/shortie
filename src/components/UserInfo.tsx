@@ -1,6 +1,5 @@
 'use client'
-import { Card, CardHeader, User } from '@heroui/react';
-import { SignOutButton } from './SignOutButton';
+import { Avatar } from '@heroui/react';
 
 interface UserInfoProps {
   userName: string
@@ -10,19 +9,16 @@ interface UserInfoProps {
 
 export function UserInfo({userName, email, avatarImg}: UserInfoProps) {
   return (
-    <Card>
-      <CardHeader>
-        <div>
-          <User
-            avatarProps={{
-              src: avatarImg
-            }}
-            description={email}
-            name={userName}
-          />
-        </div>
-        <SignOutButton/>
-      </CardHeader>
-    </Card>
+    <div className='flex flex-col justify-center items-center'>
+      <Avatar
+        src={avatarImg}
+        name={userName}
+        size='lg'
+      />
+      <div className='flex flex-col text-center mt-4'>
+        <p className='text-lg font-bold'>{userName}</p>
+        <p className='text-foreground/70'>{email}</p>
+      </div>
+    </div>
   )
 }
