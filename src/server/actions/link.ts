@@ -1,5 +1,5 @@
-  'use server'
-import { auth } from '@/auth';
+'use server'
+
 import { db } from '@/db/client';
 
 import { links, linksTags, SelectLinks, SelectTags, tags } from '@/db/db-schemas';
@@ -8,17 +8,15 @@ import { generateCUID2 } from '@/utils/cuid2';
 import { revalidatePath } from 'next/cache';
 import { and, eq, inArray, like, sql } from 'drizzle-orm';
 import { getTags } from './tag';
+import {  LinkErrors, SessionErrors } from './types';
+import { hasUser } from '@/utils/actions';
 
-enum LinkErrors {
-  SESSION_NOT_FOUND = 'User session not found',
-  NOT_VALID_DATA = 'Data is not valid to be sent to the database',
-  SUBMIT_ERROR = 'Error submiting link data in Database',
-  DELETION_ERROR = 'Link deletion failed',
-  QUERY_ERROR = 'Error fetching link data',
-  UPDATE_ERROR = 'Error updating link data'
-}
+type TagAndSessionErrorValues = LinkErrors | SessionErrors;
+type LinkBaseReturn = {
+  success: boolean
+  error: TagAndSessionErrorValues | ''
+};
 
-export type LinkBaseReturn = { success: boolean; error?: LinkErrors | ''; }
 type createLinkResult = LinkBaseReturn & { linkId?: string}
 
 /**
@@ -36,13 +34,15 @@ type createLinkResult = LinkBaseReturn & { linkId?: string}
  */
 export async function createLink(linkData: CreateLinkSchema): Promise<createLinkResult> {  
   try {
-    const session = await auth()
+    const { session, error, success: sessionSuccess } = await hasUser()
+    const userId = session?.user?.id
+    
     const { success, data } = CreateLinkSchema.safeParse(linkData)
     
-    if (!session?.user?.id) {
+    if (!session || !sessionSuccess || !userId) {
       return {
         success: false,
-        error: LinkErrors.SESSION_NOT_FOUND
+        error
       }
     }
 
@@ -57,7 +57,7 @@ export async function createLink(linkData: CreateLinkSchema): Promise<createLink
     const fullLinkData: SelectLinks = {
       ...data,
       id: generateCUID2(),
-      userId: session.user.id,
+      userId,
       clicks: 0,
       createdAt: new Date().toISOString(),
       recentClick: '', 
@@ -89,7 +89,7 @@ type UpdateLinkProps = {linkData: SelectLinks, newLinkData: EditLinkSchema}
  * 
  * @param linkData - Link data provided by the Database: {@link SelectLinks}
  * @param newLinkData - An object that satisfies the needs of {@link EditLinkSchema}
- * @returns an object indicating if the operation was succesful or not {@link LinkBaseReturn}
+ * @returns an object indicating if the operation was successful or not {@link LinkBaseReturn}
  *  
  * @see {@link SelectLinks}
  * @see {@link EditLinkSchema}
@@ -97,14 +97,15 @@ type UpdateLinkProps = {linkData: SelectLinks, newLinkData: EditLinkSchema}
  */
 export async function updateLink({linkData, newLinkData}: UpdateLinkProps): Promise<LinkBaseReturn> {
   try {
-    const session = await auth()
-    const { success } = EditLinkSchema.safeParse(newLinkData)
-    
-    if (!session?.user?.id) {
+    const { session, error, success: sessionSuccess } = await hasUser()
+    const userId = session?.user?.id
 
+    const { success } = EditLinkSchema.safeParse(newLinkData)
+
+    if (!session || !sessionSuccess || !userId) {
       return {
         success: false,
-        error: LinkErrors.SESSION_NOT_FOUND
+        error
       }
     }
 
@@ -119,6 +120,7 @@ export async function updateLink({linkData, newLinkData}: UpdateLinkProps): Prom
     await db.update(links)
       .set(newLinkData)
       .where(eq(links.id, linkData.id))
+      
     revalidatePath('/dashboard')
     
     return {
@@ -140,30 +142,26 @@ export async function updateLink({linkData, newLinkData}: UpdateLinkProps): Prom
  * 
  * 
  * @param link - Link data provided by the database {@link SelectLinks}
- * @returns an object indicating if the operation was succesful or not {@link LinkBaseReturn}
+ * @returns an object indicating if the operation was successful or not {@link LinkBaseReturn}
  * 
  * @see {@link SelectLinks}
  * @see {@link LinkBaseReturn}
  */
 export async function deleteLink(link: SelectLinks): Promise<LinkBaseReturn> {
   try {
-    const session = await auth()
+    const { session, error, success: sessionSuccess } = await hasUser()
+    const userId = session?.user?.id
 
-    if (!session?.user?.id) {
+    if (!session || !sessionSuccess || !userId) {
       return {
         success: false,
-        error: LinkErrors.SESSION_NOT_FOUND
+        error
       }
     }
 
-    await db.transaction(async (tx) => {
-      await tx.delete(linksTags)
-        .where( eq(linksTags.linkId, link.id) )
-        
-      await tx.delete(links)
-        .where( eq(links.id, link.id) )
-    })
-      
+    await db.delete(links)
+      .where( eq(links.id, link.id) )
+
     revalidatePath('/dashboard')
     
     return {success: true, error: ''}
@@ -189,12 +187,13 @@ type GetLinkReturn = LinkBaseReturn & {data?: SelectLinks | null}
  */
 export async function getLink({linkId}: {linkId: string}): Promise<GetLinkReturn> {
   try {
-    const session = await auth()
+    const { session, error, success: sessionSuccess } = await hasUser()
 
-    if (!session?.user?.id) {
+    const userId = session?.user?.id
+    if (!session || !sessionSuccess || !userId) {
       return {
         success: false,
-        error: LinkErrors.SESSION_NOT_FOUND
+        error
       }
     }
 
@@ -233,23 +232,24 @@ type GetLinksReturn = LinkBaseReturn & { data?: SelectLinks[] | null }
 */
 export async function getLinks({limit, offset}: {limit?: number, offset?: number}): Promise<GetLinksReturn> {
   try {
-    const session = await auth()
-
-    if (!session?.user?.id) {
+    const { session, error, success: sessionSuccess } = await hasUser()
+    const userId = session?.user?.id
+    if (!session || !sessionSuccess || !userId) {
       return {
         success: false,
-        error: LinkErrors.SESSION_NOT_FOUND
+        error
       }
     }
 
     let result  = await db.select()
-      .from(links).where(eq(links.userId, session.user.id))
+      .from(links).where(eq(links.userId, userId))
       .limit(limit ?? 10)
       .offset(offset ?? 0)
     
     return {
       success: true,
-      data: result
+      data: result,
+      error: ''
     }
   } catch (error) {
     console.log('Error querying links', error);
@@ -280,17 +280,15 @@ export type LinksAndTags  = SelectLinks & {
  */
 export async function getLinksAndTags({searchTitle, selectedTags}: GetLinksAndTagsProps) : Promise<GetLinksAndTagsReturn> {
   try {
-    const session = await auth()
-
-    if (!session?.user?.id) {
-      console.log('Session not found');
-      
+    const { session, error, success: sessionSuccess } = await hasUser()
+    const userId = session?.user?.id
+    if (!session || !sessionSuccess || !userId) {
       return {
         success: false,
-        error: LinkErrors.SESSION_NOT_FOUND
+        error
       }
-    } 
-    
+    }
+
     const query = await db.select({
         id: links.id,
         title: links.title,
@@ -305,7 +303,7 @@ export async function getLinksAndTags({searchTitle, selectedTags}: GetLinksAndTa
         tags: sql<string>`
           CASE 
             WHEN EXISTS (
-              SELECT 1 FROM links_tags lt WHERE lt.linkId = links.id
+              SELECT 1 FROM links_tags lt WHERE lt.link_id = links.id
             ) THEN json_group_array( ${tags.id})
             ELSE NULL
           END
@@ -316,7 +314,7 @@ export async function getLinksAndTags({searchTitle, selectedTags}: GetLinksAndTa
       .leftJoin(tags, eq(linksTags.tagId, tags.id))
       .where(
         and(
-          eq(links.userId, session.user.id),
+          eq(links.userId, userId),
           ...(searchTitle ? [like(links.title, `%${searchTitle}%`)] : []),
           ...(selectedTags?.length ? [inArray(tags.id, selectedTags)] : [])
         )
@@ -324,22 +322,72 @@ export async function getLinksAndTags({searchTitle, selectedTags}: GetLinksAndTa
       .groupBy(links.id)
       .limit(20).offset(0)
 
-
     const linksFromUser = query.map((obj) => {
       return { ...obj, tags: JSON.parse(obj.tags) }
     }) as LinksAndTags[]
+
     const tagsFromUser = await getTags()
     
     return {
       success: true,
       links: linksFromUser,
-      tags: tagsFromUser.data
+      tags: tagsFromUser.data,
+      error: ''
     }
     
   } catch (error) {
+
+    console.log('ERROR: ', error);
+    
     return {
       success: false,
       error: LinkErrors.QUERY_ERROR
     }
   }
 }
+
+/**
+ * **Database request (delete all links from a user)**
+ * - Requires the **user to be authenticated** 
+ * 
+ * @returns a promise that resolve to an object: {@link LinkBaseReturn}
+ * 
+ * @see {@link LinkBaseReturn}
+ */
+export async function deleteLinks(): Promise<LinkBaseReturn> {
+  
+  try {
+    const { session, error, success: sessionSuccess } = await hasUser()
+    const userId = session?.user?.id
+    
+    if (!session || !sessionSuccess || !userId) {
+      console.log('DELETE LINKS FAILED');
+      return {
+        success: false,
+        error
+      }
+
+    }
+
+    console.log('DELETE LINKS', {userId});
+
+    await db.delete(links)
+    .where( eq(links.userId, userId) )
+    
+    revalidatePath('/dashboard')
+    
+    return {
+      success: true,
+      error: ''
+    }
+  } catch (error) {
+    console.log('DELETE LINKS ERROR: ', error);
+    
+    return {
+      success: false,
+      error: LinkErrors.DELETION_ERROR
+    }
+  }
+}
+
+  
