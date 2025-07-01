@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { and, eq, inArray, like, sql } from 'drizzle-orm';
 import { getTags } from './tag';
 import {  LinkErrors, SessionErrors } from './types';
-import { hasUser } from '@/utils/actions';
+import { getUserSession } from '@/utils/actions';
 
 type TagAndSessionErrorValues = LinkErrors | SessionErrors;
 type LinkBaseReturn = {
@@ -34,7 +34,7 @@ type createLinkResult = LinkBaseReturn & { linkId?: string}
  */
 export async function createLink(linkData: CreateLinkSchema): Promise<createLinkResult> {  
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
     
     const { success, data } = CreateLinkSchema.safeParse(linkData)
@@ -97,7 +97,7 @@ type UpdateLinkProps = {linkData: SelectLinks, newLinkData: EditLinkSchema}
  */
 export async function updateLink({linkData, newLinkData}: UpdateLinkProps): Promise<LinkBaseReturn> {
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
 
     const { success } = EditLinkSchema.safeParse(newLinkData)
@@ -149,7 +149,7 @@ export async function updateLink({linkData, newLinkData}: UpdateLinkProps): Prom
  */
 export async function deleteLink(link: SelectLinks): Promise<LinkBaseReturn> {
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
 
     if (!session || !sessionSuccess || !userId) {
@@ -187,7 +187,7 @@ type GetLinkReturn = LinkBaseReturn & {data?: SelectLinks | null}
  */
 export async function getLink({linkId}: {linkId: string}): Promise<GetLinkReturn> {
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
 
     const userId = session?.user?.id
     if (!session || !sessionSuccess || !userId) {
@@ -232,7 +232,7 @@ type GetLinksReturn = LinkBaseReturn & { data?: SelectLinks[] | null }
 */
 export async function getLinks({limit, offset}: {limit?: number, offset?: number}): Promise<GetLinksReturn> {
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
     if (!session || !sessionSuccess || !userId) {
       return {
@@ -280,7 +280,7 @@ export type LinksAndTags  = SelectLinks & {
  */
 export async function getLinksAndTags({searchTitle, selectedTags}: GetLinksAndTagsProps) : Promise<GetLinksAndTagsReturn> {
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
     if (!session || !sessionSuccess || !userId) {
       return {
@@ -357,7 +357,7 @@ export async function getLinksAndTags({searchTitle, selectedTags}: GetLinksAndTa
 export async function deleteLinks(): Promise<LinkBaseReturn> {
   
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
     
     if (!session || !sessionSuccess || !userId) {

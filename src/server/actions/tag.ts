@@ -6,7 +6,7 @@ import { CreateTagSchema, EditLinkSchema } from '@/schemas/schema'
 import { generateCUID2 } from '@/utils/cuid2'
 import { and, eq, inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { hasUser } from '@/utils/actions'
+import { getUserSession } from '@/utils/actions'
 import { SessionErrors, TagErrors } from './types'
 
 type TagAndSessionErrorValues = TagErrors | SessionErrors;
@@ -28,7 +28,7 @@ type TagBaseReturn = {
  */
 export async function createTag(tagData: CreateTagSchema): Promise<TagBaseReturn> {
   try {
-    const { session, success: sessionSuccess, error } = await hasUser()
+    const { session, success: sessionSuccess, error } = await getUserSession()
     const userId = session?.user?.id
     const { success, data } = CreateTagSchema.safeParse(tagData)
     
@@ -82,7 +82,7 @@ export type UpdateTagProps = {tagData: SelectTags, newTagData: CreateTagSchema}
  */
 export async function updateTag({tagData, newTagData}: UpdateTagProps): Promise<TagBaseReturn> {
   try {
-    const { session, success: sessionSuccess, error } = await hasUser()
+    const { session, success: sessionSuccess, error } = await getUserSession()
     const { success } = CreateTagSchema.safeParse(newTagData)
     
     if (!sessionSuccess || !session) { 
@@ -130,7 +130,7 @@ export type DeleteTagProps = {tag: SelectTags}
  */
 export async function deleteTag({ tag }: DeleteTagProps): Promise<TagBaseReturn>  {
   try {
-    const { session, success, error } = await hasUser()
+    const { session, success, error } = await getUserSession()
     const userId = session?.user?.id
 
     if (!success || !userId) {
@@ -172,7 +172,7 @@ export async function deleteTag({ tag }: DeleteTagProps): Promise<TagBaseReturn>
  */
 export async function addTags({ tags, linkId }: { tags: string[], linkId: string }): Promise<TagBaseReturn> {
   try {
-    const { session, success, error } = await hasUser()
+    const { session, success, error } = await getUserSession()
     const userId = session?.user?.id
 
     if (!success || !userId) {
@@ -216,7 +216,7 @@ export type getTagsReturn = TagBaseReturn & { data?: SelectTags[] }
  */
 export async function getTags(): Promise<getTagsReturn> {
   try {
-    const { session, success, error } = await hasUser()
+    const { session, success, error } = await getUserSession()
     const userId = session?.user?.id
     if (!success || !session || !userId) {
       return {
@@ -263,7 +263,7 @@ export type UpdateLInksTagsProps = {
  */
 export async function updateLinksTags ({ prevTags, newTags, linkId }: UpdateLInksTagsProps): Promise<TagBaseReturn> {
   try {
-    const { success, session, error } = await hasUser()
+    const { success, session, error } = await getUserSession()
     const userId = session?.user?.id
     
     if (!success || !session || !userId) {
@@ -332,7 +332,7 @@ export async function deleteTags(): Promise<TagBaseReturn> {
   try {
     console.log('DELETE TAGS');
     
-    const { success, session, error } = await hasUser()
+    const { success, session, error } = await getUserSession()
     const userId = session?.user?.id
 
     if (!success || !session || !userId) {

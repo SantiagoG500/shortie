@@ -3,7 +3,7 @@
 import { db } from '@/db/client';
 import { InsertUser, users } from '@/db/db-schemas';
 import { CreateAuthSchema } from '@/schemas/schema';
-import { hasUser } from '@/utils/actions';
+import { getUserSession } from '@/utils/actions';
 import { eq } from 'drizzle-orm';
 import { SessionErrors, UserErrors } from './types';
 
@@ -47,7 +47,7 @@ export async function getUser(authData: CreateAuthSchema): Promise<InsertUser | 
  */
 export async function deleteUser(): Promise<userBaseReturn> {
   try {
-    const { session, error, success: sessionSuccess } = await hasUser()
+    const { session, error, success: sessionSuccess } = await getUserSession()
     const userId = session?.user?.id
 
     if (!session || !sessionSuccess || !userId) {
