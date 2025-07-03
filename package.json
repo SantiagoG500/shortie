@@ -11,7 +11,7 @@
     "db:generate:dev": "drizzle-kit generate --config=drizzle.config.dev.ts",
     "db:generate:prod": "drizzle-kit generate --config=drizzle.config.prod.ts",
     "db:migrate:dev": "drizzle-kit migrate --config=drizzle.config.dev.ts",
-    "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.dev.ts"
+    "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.prod.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
