@@ -96,6 +96,19 @@ export const CreateAuthSchema = z.object({
     .max(30, {message: 'Password cannot be larger than 30 characters'})
 })
 
+export const DeleteAccountSchema = z.object({
+  email: z.string()
+    .min(1, {message:  'Email is required'})
+    .email('Invalid Email'),
+  confirmEmail: z.string()
+})
+.refine(
+  accountInfo => accountInfo.email === accountInfo.confirmEmail,
+  {
+    message: 'Email account does not match',
+    path: ['email']
+  }
+)
 
 export type CreateLinkSchema = z.TypeOf<typeof CreateLinkSchema>
 export type DeleteLinkSchema = z.TypeOf<typeof DeleteLinkSchema>
@@ -105,3 +118,4 @@ export type CreateTagSchema = z.TypeOf<typeof CreateTagSchema>
 export type DeleteTagSchema = z.TypeOf<typeof DeleteTagSchema>
 
 export type CreateAuthSchema = z.TypeOf<typeof CreateAuthSchema>
+export type DeleteAccountSchema = z.TypeOf<typeof DeleteAccountSchema>

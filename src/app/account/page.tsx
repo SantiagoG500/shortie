@@ -1,4 +1,5 @@
 import { auth } from '@/auth'
+import { AccountSettings } from '@/components/AccountSettings'
 import { UserInfo } from '@/components/UserInfo'
 
 export default async function Account() {
@@ -10,19 +11,15 @@ export default async function Account() {
 
   return (
     <>
-      <main className='pl-7 pr-7 '>
-      
-        <div className='flex justify-center gap-5 flex-wrap'>
-          <div>
-            <h2 className='text-2xl font-bold mb-5'>General Information</h2>
-            <UserInfo
-              userName={userName}
-              email={email}
-              avatarImg={session?.user?.image ?? ''}
-            />
-          </div>
+      <main className=' pl-7 pr-7'>
+        <UserInfo
+          userName={userName}
+          email={email}
+          avatarImg={session?.user?.image ?? ''}
+        />
+        <div className='mt-6 mx-auto max-w-md '>
+          <AccountSettings email={email}/>
         </div>
-        
       </main>
     </> 
   )
