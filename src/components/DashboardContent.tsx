@@ -5,9 +5,10 @@ import { useState } from 'react'
 
 import { LinkCard } from './LinkCard'
 import { DeleteLinkModal } from './DeleteLinkModal'
-import { SelectLinks, SelectTags } from '@/db/db-schemas'
+import { SelectTags } from '@/db/db-schemas'
 import { EditLinkModal } from './EditLinkModal'
 import { LinksAndTags } from '@/server/actions/link'
+import QrModal from './QrModal'
 
 
 export function DashboardContent({ links, tags }: {links: LinksAndTags[], tags: SelectTags[]}) { 
@@ -20,6 +21,11 @@ export function DashboardContent({ links, tags }: {links: LinksAndTags[], tags: 
     isOpen: isEditModalOpen,
     onOpen: onEditModalOpen,
     onOpenChange: onEditModalOpenChange
+  } = useDisclosure()
+  const {
+    isOpen: isQrModalOpen,
+    onOpen: onQrModalOpen,
+    onOpenChange: onQrModalOpenChange
   } = useDisclosure()
 
   // Used to let the edit modal know which link was selected
@@ -52,6 +58,7 @@ export function DashboardContent({ links, tags }: {links: LinksAndTags[], tags: 
               handleCurrentLink={handleCurrentLink}
               onDeleteModalOpen={onDeleteModalOpen}
               onEditModalOpen={onEditModalOpen}
+              onQrModalOpen={onQrModalOpen}
             />
           )
         })
@@ -66,6 +73,11 @@ export function DashboardContent({ links, tags }: {links: LinksAndTags[], tags: 
         link={currentLink}
         isModalOpen={isEditModalOpen}
         onOpenChange={onEditModalOpenChange}
+      />
+      <QrModal
+        link={currentLink}
+        isModalOpen={isQrModalOpen}
+        onOpenChange={onQrModalOpenChange}
       />
     </>
   )
