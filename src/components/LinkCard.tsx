@@ -1,18 +1,19 @@
 'use client'
 
-import { addToast, Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Popover, PopoverContent, PopoverTrigger } from '@heroui/react';
-import { Hash, Copy, Trash, Pencil } from 'lucide-react';
+import { addToast, Button, Card, CardBody, CardFooter, CardHeader, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@heroui/react';
+import { Hash, Copy, Trash, Pencil, Clipboard, QrCodeIcon } from 'lucide-react';
 import { appDomain } from '@/routes';
 import { LinksAndTags } from '@/server/actions/link';
 
 interface LinkCardProps {
   linkData: LinksAndTags,
   handleCurrentLink: (link: LinksAndTags) => void,
-  onDeleteModalOpen : () => void
-  onEditModalOpen : () => void
+  onDeleteModalOpen: () => void,
+  onEditModalOpen: () => void,
+  onQrModalOpen:  () => void
 }
 
-export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEditModalOpen}: LinkCardProps) {
+export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEditModalOpen, onQrModalOpen}: LinkCardProps) {
   const {title, description, createdAt, url, slug, clicks} = linkData
 
   const formatedDate = new Date(createdAt)
@@ -55,48 +56,40 @@ export function LinkCard({linkData, handleCurrentLink, onDeleteModalOpen, onEdit
           <p className='text-base line-clamp-2 text-foreground'>{description}</p>
           <div className='flex items-center gap-2'>
             <span className='text-foreground hover:text-foreground/75 text-sm truncate' title='original link'>{url}</span>
-            <Popover color='primary'>
-              <PopoverTrigger>
-                <Button isIconOnly className=' hover:text-primary-400' variant='light' size='sm'>
-                  <Copy className='w-4 h-4'/>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-min p-0'>
-                <ButtonGroup>
-                  <Button
-                    className='text-primary hover:text-primary-400 font-bold'
-                    
-                    value={url}
-                    onPress={async () => {
-                      await navigator.clipboard.writeText(url)
-                      addToast({
-                        title: 'Link copied to clipboard',
-                        description: `${url}`,
-                        color: 'success'
-                      })
-                    }}
+              <Dropdown>
+                  <DropdownTrigger>
+                    <Button isIconOnly className=' hover:text-primary-400' variant='light' size='sm'>
+                      <Copy className='w-4 h-4'/>
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Static Actions" color='primary' variant='faded'>
+                    <DropdownItem
+                      key="copy-link"
+                      startContent={<Clipboard/>}
+                      onPress={async () => {
+                        const redirectUrl= `${appDomain}${slug}`
+                        await navigator.clipboard.writeText(redirectUrl)
+                        addToast({
+                          title: 'Link copied to clipboard',
+                          description: `${redirectUrl}`,
+                          color: 'success'
+                        })
+                      }}
                     >
-                      Copy original link
-                  </Button>
-                  <Button
-                    className='text-primary hover:text-primary-400 font-bold'
-                    
-                    value={`${appDomain}${slug}`}
-                    onPress={async () => {
-                      const redirectUrl= `${appDomain}${slug}`
-                      await navigator.clipboard.writeText(redirectUrl)
-                      addToast({
-                        title: 'Link copied to clipboard',
-                        description: `${redirectUrl}`,
-                        color: 'success'
-                      })
-                    }}
-                  >
-                    Copy Shortened link
-                  </Button>
-                </ButtonGroup>
-              </PopoverContent>
-            </Popover>
+                      Copy shortened link
+                    </DropdownItem>
+                    <DropdownItem
+                      key="copy-qr"
+                      startContent={<QrCodeIcon/>}
+                      onPress={() => {
+                        handleCurrentLink(linkData)
+                        onQrModalOpen()
+                      }}
+                    >
+                      Copy Qr code
+                    </DropdownItem>
+                  </DropdownMenu>
+              </Dropdown>
           </div>
         </CardBody>
 
