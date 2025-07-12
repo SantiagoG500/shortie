@@ -1,11 +1,13 @@
 import { SelectLinks, SelectTags } from '@/db/db-schemas';
 import { appDomain } from '@/routes';
-import { CreateLinkSchema, CreateTagSchema, DeleteLinkSchema, DeleteTagSchema, EditLinkSchema } from '@/schemas/schema';
+import { CreateLinkSchema, CreateTagSchema, DeleteAccountSchema, DeleteLinkSchema, DeleteTagSchema, EditLinkSchema } from '@/schemas/schema';
 import { createLink, deleteLink, LinksAndTags, updateLink } from '@/server/actions/link';
 import { addTags, createTag, deleteTag, updateLinksTags, updateTag } from '@/server/actions/tag';
+import { deleteUser } from '@/server/actions/user';
 import { generateCUID2 } from '@/utils/cuid2';
 import { addToast, PressEvent } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -192,12 +194,6 @@ export function useLinkEditForm({onOpenChange, link, userTags, previousTags}: us
       const filteredFields = objToArray.filter(field => field[1])
       
       if (filteredFields.length > 0) {
-        console.log('update link', {
-          filteredFields,
-          objToArray,
-          selectedTags
-        });
-        
         await updateLink({
           linkData: link,
           newLinkData: Object.fromEntries(filteredFields)
@@ -205,8 +201,9 @@ export function useLinkEditForm({onOpenChange, link, userTags, previousTags}: us
 
         handleClose()
       }
+      
 
-      if (selectedTags && selectedTags.size > 0) {
+      if (selectedTags && selectedTags.size > 0) {       
         if (selectedTags) {
           console.log('edit tags');
           
@@ -221,10 +218,8 @@ export function useLinkEditForm({onOpenChange, link, userTags, previousTags}: us
             description: error,
             color: 'danger'
           })
-
-        } else {
-          console.log('add tags');
           
+        } else {
           const { error, success } = await addTags({
             linkId: link.id,
             tags: Array.from(selectedTags)
@@ -303,7 +298,6 @@ export function useTagForm ({onOpenChange}: BaseUseFormType) {
 
   const onSubmit = async (data: z.infer<typeof CreateTagSchema>) => {
     try {
-      // Implement logic
       const requestResult = await createTag(data)
       
       if (!requestResult.success) {
@@ -446,4 +440,64 @@ export function useDeleteTagForm({onOpenChange, tag}: useDeleteTagFormProps) {
   }
 
   return { register, handleSubmit, onSubmit, isSubmitting, errors }
+}
+
+type useDeleteAccountProps =  BaseUseFormType & { email: string }
+export function useDeleteAccount({ onOpenChange, email }: useDeleteAccountProps) {
+ const form = useForm<z.infer<typeof DeleteAccountSchema>>({
+    resolver: zodResolver(DeleteAccountSchema),
+    defaultValues:{ confirmEmail: email }
+  })
+
+  const {
+    register,
+    handleSubmit,
+    formState: {errors, isSubmitting},
+    reset,
+    setValue,
+    watch,
+    control
+  } = form
+
+  useEffect(() => {
+    setValue('confirmEmail', email)
+  }, [setValue, email])
+  
+  const onSubmit = async (data: z.infer<typeof DeleteAccountSchema>) => {
+    try {
+      // ACCOUNT DELETION LOGIC
+      if (data.email.length === 0) {
+        addToast({ 
+          title: 'Delete Account failed',
+          description: "You didn't provide email confirmation to delete your user account"
+        })
+        
+        return
+      }
+      const { error, success } = await deleteUser()
+      
+      if (!success) {
+        addToast({
+          title: 'Delete Account failed',
+          description: error
+        })
+      }
+
+      await signOut()
+      
+      console.log('ONSUBMIT');
+    } catch (error) {
+      console.log('ONSUBMIT ERROR: ', error)
+      
+    } finally {
+      handleClose()
+    }
+  }
+
+  const handleClose = () => {
+    reset()
+    onOpenChange()
+  }
+
+  return { register, handleSubmit, handleClose, onSubmit, isSubmitting, errors }
 }
